@@ -42,3 +42,52 @@ lib
 ```
 
 ![img.png](assets/md/img.png)
+
+# 配置签名
+
+1. 创建一个密钥库：你可以使用keytool命令来创建一个密钥库。这个命令可能会像这样：
+
+```bash
+keytool -genkey -v -keystore ~/key.jks -keyalg RSA -keysize 2048 -validity 10000 -alias key
+```
+
+正在存储/Users/username/key.jks
+
+将文件copy到android/app目录下
+
+2. 在你的Flutter项目中创建一个名为android/key.properties的文件，并在其中存储你的密钥库信息：
+
+```bash
+storePassword=<store password>
+keyPassword=<key password>
+keyAlias=key
+storeFile=<location of the key store file, e.g. /Users/<user name>/key.jks>
+```
+
+3. 更新你的android/app/build.gradle文件，以从key.properties文件中读取密钥库信息，并将其用于签名你的应用：
+
+```bash
+android {
+    ...
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
+}
+```
+
+4. 现在，你可以使用命令来生成一个已签名的APK文件。
+
+```bash
+flutter build apk --release
+```
